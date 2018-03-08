@@ -2,12 +2,15 @@ import React, { Component } from "react";
 import PropTypes from "prop-types";
 import path from "path";
 
-import { HashRouter as Router, Route } from "react-router-dom";
+import { Router, Route } from "react-router-dom";
+import { createBrowserHistory } from "history";
+
+const history = createBrowserHistory();
 
 class App extends Component {
   render() {
     return (
-      <Router>
+      <Router history={history}>
         <div>
           {this.props.routes.map((route, index) => {
             const { path, container, ...rest } = route;

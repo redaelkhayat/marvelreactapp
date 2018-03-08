@@ -1,9 +1,28 @@
 import React from "react";
 import PropTypes from "prop-types";
+import injectSheet from "react-jss";
+import classnames from "classnames";
 
 import Loader from "./Loader";
+import Hero from "./Hero";
+
+import { utils } from "app/theme/styles";
+
+const styles = {
+  thumb: ({ thumbnail: { path, extension } }) => {
+    return {
+      height: 0,
+      paddingTop: `${537 * 1e2 / 633}%`,
+      background: `#222 url('${path}.${extension}') center`,
+      backgroundSize: "cover",
+      borderRadius: 5,
+      border: "2px solid #0e0e13"
+    };
+  }
+};
 
 const Info = ({
+  classes,
   fetching,
   id,
   name,
@@ -12,64 +31,18 @@ const Info = ({
   comics,
   series
 }) => {
-  if (fetching) {
-    return <Loader />;
-  }
   return (
-    <div className="row">
-      <div className="col-md-4 col-sm-5">
-        <div className="thumbnail">
-          <img src={`${thumbnail.path}.${thumbnail.extension}`} />
-        </div>
+    <div className={utils.cols}>
+      <div className={classnames(utils.col, utils.oneThird)}>
+        <div className={classes.thumb} />
       </div>
-      <div className="col-md-8 col-sm-7">
-        <h2>{name}</h2>
-        {description && <p>{description}</p>}
-        <div className="row">
-          {comics &&
-            comics.items.length > 0 && (
-              <div className="col-md-6">
-                <h4>Comics</h4>
-                <ul className="list-group small">
-                  {comics.items.map(({ name, resourceURI }, index) => {
-                    return (
-                      <li key={`comic-${index}`} className="list-group-item">
-                        {name}
-                      </li>
-                    );
-                  })}
-                </ul>
-              </div>
-            )}
-          {series &&
-            series.items.length > 0 && (
-              <div className="col-md-6">
-                <h4>Series</h4>
-                <ul className="list-group small">
-                  {series.items.map(({ name, resourceURI }, index) => {
-                    return (
-                      <li key={`serie-${index}`} className="list-group-item">
-                        {name}
-                      </li>
-                    );
-                  })}
-                </ul>
-              </div>
-            )}
-        </div>
+      <div className={classnames(utils.col, utils.twoThird)}>
+        {description ? description : <i>No description</i>}
       </div>
+      <div className={utils.clear} />
     </div>
   );
 };
-
-const itemsPropTypes = PropTypes.shape({
-  items: PropTypes.arrayOf(
-    PropTypes.shape({
-      name: PropTypes.string.isRequired,
-      resourceURI: PropTypes.string
-    })
-  )
-});
 
 Info.propTypes = {
   fetching: PropTypes.bool.isRequired,
@@ -80,8 +53,22 @@ Info.propTypes = {
     path: PropTypes.string.isRequired,
     extension: PropTypes.string.isRequired
   }),
-  comics: itemsPropTypes,
-  series: itemsPropTypes
+  comics: PropTypes.shape({
+    items: PropTypes.arrayOf(
+      PropTypes.shape({
+        name: PropTypes.string.isRequired,
+        resourceURI: PropTypes.string
+      })
+    )
+  }),
+  series: PropTypes.shape({
+    items: PropTypes.arrayOf(
+      PropTypes.shape({
+        name: PropTypes.string.isRequired,
+        resourceURI: PropTypes.string
+      })
+    )
+  })
 };
 
-export default Info;
+export default injectSheet(styles)(Info);

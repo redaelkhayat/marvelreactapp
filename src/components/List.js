@@ -1,41 +1,36 @@
 import React from "react";
 import PropTypes from "prop-types";
+import classnames from "classnames";
 import { Link } from "react-router-dom";
 
 import Hero from "./Hero";
 import Loader from "./Loader";
 
-const HeroList = ({ fetching, heros, changePage }) => {
+import { utils } from "app/theme/styles";
+
+const HeroList = ({ fetching, heros }) => {
   return (
     <div>
-      <div className="btn-group btn-group-sm pull-right">
-        <button className="btn btn-primary" onClick={() => changePage("prev")}>
-          Previous
-        </button>
-        <button className="btn btn-primary" onClick={() => changePage("next")}>
-          Next
-        </button>
-      </div>
-      <p>&nbsp;</p>
-      <div className="clear" />
       {fetching && <Loader />}
-      <div className="row">
-        <p>&nbsp;</p>
+      <div className={utils.cols}>
         {heros.map(hero => {
           return (
-            <div key={hero.id} className="col-md-3 col-sm-4 col-xs-6">
+            <div
+              key={hero.id}
+              className={classnames(utils.col, utils.oneFifth)}
+            >
               <Hero {...hero} />
             </div>
           );
         })}
+        <div className={utils.clear} />
       </div>
     </div>
   );
 };
 
 HeroList.propTypes = {
-  heros: PropTypes.arrayOf(PropTypes.object).isRequired,
-  changePage: PropTypes.func
+  heros: PropTypes.arrayOf(PropTypes.object).isRequired
 };
 
 export default HeroList;

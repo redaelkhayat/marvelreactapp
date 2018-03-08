@@ -15,9 +15,11 @@ const store = createStore(
   applyMiddleware(logger, thunk)
 );
 
+import Layout from "app/theme";
 import App from "./router";
-import Layout from "./components/Layout";
 import { routes } from "./routes";
+
+import "./public/index.html";
 
 const target = document.getElementById("app");
 render(

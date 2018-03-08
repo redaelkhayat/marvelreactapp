@@ -1,4 +1,11 @@
-import { LOAD, SUCCESS, FAIL } from "./actionTypes";
+import {
+  LOAD,
+  SUCCESS,
+  FAIL,
+  SPOTLIGHT,
+  CHANGE_CRITERIA,
+  SORT_ORDER
+} from "./actionTypes";
 import callApi from "../api/callApi";
 
 const callApiWithDispatch = (uri, params = {}) => {
@@ -14,7 +21,7 @@ const callApiWithDispatch = (uri, params = {}) => {
   };
 };
 
-export const getHeros = (offset = 0) => {
+export const fetchHeros = (offset = 0) => {
   return callApiWithDispatch("/v1/public/characters", {
     offset
   });
@@ -22,4 +29,25 @@ export const getHeros = (offset = 0) => {
 
 export const getHeroInfo = heroId => {
   return callApiWithDispatch(`/v1/public/characters/${heroId}`);
+};
+
+export const spotlight = name => {
+  return {
+    name,
+    type: SPOTLIGHT
+  };
+};
+
+export const setSort = name => {
+  return {
+    type: CHANGE_CRITERIA,
+    name
+  };
+};
+
+export const changeOrder = order => {
+  return {
+    type: SORT_ORDER,
+    order
+  };
 };

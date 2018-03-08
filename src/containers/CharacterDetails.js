@@ -1,46 +1,65 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
+import * as R from "ramda";
+import {
+  compose,
+  lifecycle,
+  withProps,
+  withHandlers,
+  branch,
+  renderComponent
+} from "recompose";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
 
 import { getHeroInfo } from "../redux/actions";
 
+import { Button, Title } from "app/theme/ui";
 import Info from "../components/Info";
+import Loader from "../components/Loader";
 
-class CharacterDetails extends Component {
-  componentDidMount() {
-    const { getHeroInfo, match } = this.props;
-    getHeroInfo(match.params.characterId);
-  }
-  render() {
-    const { fetching, data } = this.props;
-    if(! data.length)
-      return null;
-    const hero = data[0];
-    return (
-      <div>
-        <h1>Fiche identité</h1>
-        <Link to="/" className="btn btn-primary">
+import { utils } from "app/theme/styles";
+
+const CharacterDetails = ({ hero, fetching }) => {
+  return (
+    <div>
+      <Title text={hero.name}>
+        <Button to="/" className={utils.uppercase}>
           Back to home
-        </Link>
-        <p>&nbsp;</p>
-        <Info {...hero} fetching={fetching} />
-      </div>
-    );
-  }
-}
+        </Button>
+      </Title>
+      <Info {...hero} fetching={fetching} />
+    </div>
+  );
+};
+
+const enhance = compose(
+  connect(state => state.heros),
+  withProps(({ data }) => {
+    return {
+      isEmpty: R.isEmpty(data),
+      hero: R.head(data)
+    };
+  }),
+  withHandlers({
+    getHeroInfo: ({ dispatch, match: { params: { characterId } } }) => () => {
+      dispatch(getHeroInfo(characterId));
+    }
+  }),
+  lifecycle({
+    componentDidMount() {
+      this.props.getHeroInfo();
+    }
+  }),
+  branch(
+    ({ fetching, isEmpty }) => isEmpty || fetching,
+    renderComponent(Loader)
+  )
+);
 
 CharacterDetails.propTypes = {
   fetching: PropTypes.bool.isRequired,
   data: PropTypes.array
 };
 
-const mapStateToProps = state => {
-  return state.heros;
-};
-
-const mapDispatchToProps = {
-  getHeroInfo
-};
-
-export default connect(mapStateToProps, mapDispatchToProps)(CharacterDetails);
+export default enhance(CharacterDetails);

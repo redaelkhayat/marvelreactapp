@@ -1,67 +1,64 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
+import { compose, lifecycle, withHandlers } from "recompose";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
 
-import { getHeros } from "../redux/actions";
+import { fetchHeros, spotlight, setSort, changeOrder } from "../redux/actions";
+import getHeros from "../redux/selectors";
 
+import { Title } from "app/theme/ui";
 import List from "../components/List";
+import Search from "../components/Search";
+import Sort from "../components/Sort";
 
-class Home extends Component {
-  componentDidMount() {
-    const { getHeros } = this.props;
-    getHeros();
-  }
-  changePage(type) {
-    const { getHeros, offset, itemsPerPage, total } = this.props;
-    const newOffset = Math.max(
-      0,
-      Math.min(
-        offset + (type == "next" ? itemsPerPage : -itemsPerPage),
-        total - itemsPerPage
-      )
-    );
-    if (offset == newOffset) return false;
-    getHeros(newOffset);
-  }
-  render() {
-    const { fetching, data, total, offset } = this.props;
-    return (
-      <div>
-        <h1>Liste des super héros</h1>
-        <List
-          heros={data}
-          fetching={fetching}
-          total={total}
-          offset={offset}
-          changePage={this.changePage.bind(this)}
+const Home = ({
+  data,
+  fetching,
+  onSearch,
+  onCriteriaChange,
+  onOrderChange
+}) => {
+  return (
+    <div>
+      <Title text="List of Marvel's heros">
+        <Sort
+          onCriteriaChange={onCriteriaChange}
+          onOrderChange={onOrderChange}
         />
-      </div>
-    );
-  }
-}
-
-Home.defaultProps = {
-  itemsPerPage: 20
+      </Title>
+      <Search onSearch={onSearch} />
+      <List heros={data} fetching={fetching} />
+    </div>
+  );
 };
+
+const enhance = compose(
+  connect(getHeros),
+  withHandlers({
+    fetchHeros: ({ dispatch }) => () => {
+      dispatch(fetchHeros());
+    },
+    onSearch: ({ dispatch }) => value => {
+      dispatch(spotlight(value));
+    },
+    onCriteriaChange: ({ dispatch }) => name => {
+      dispatch(setSort(name));
+    },
+    onOrderChange: ({ dispatch }) => order => {
+      dispatch(changeOrder(order));
+    }
+  }),
+  lifecycle({
+    componentDidMount() {
+      this.props.fetchHeros();
+    }
+  })
+);
 
 Home.propTypes = {
-  itemsPerPage: PropTypes.number,
   fetching: PropTypes.bool.isRequired,
-  data: PropTypes.array,
-  offset: PropTypes.number.isRequired,
-  total: PropTypes.number.isRequired
+  data: PropTypes.array
 };
 
-const mapStateToProps = (state, ownProps) => {
-  return {
-    ...state.heros,
-    ...ownProps
-  };
-};
-
-const mapDispatchToProps = {
-  getHeros
-};
-
-export default connect(mapStateToProps, mapDispatchToProps)(Home);
+export default enhance(Home);
